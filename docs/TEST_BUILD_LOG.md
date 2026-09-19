@@ -86,8 +86,10 @@ This file records numbered production candidates and research harnesses handed t
   - holding one direction does not auto-repeat until it is released and pressed again;
   - no `(DLeft)/(DRight)` text remains;
   - wake/Back remain normal and a new meditation begins at 1×.
-- Result: pending user acceptance
-- Stable promotion: pending
+- Result:
+  - user confirmed keyboard/gamepad speed selection, one-press-one-step behavior, wake flow, and overall 0.1.1 behavior work correctly;
+  - user requested one final presentation refinement: hide the unavailable left arrow at 1× and the unavailable right arrow at 4×.
+- Stable promotion: no; behavior accepted, superseded by 0.1.2 presentation refinement
 
 ## Production candidate template
 
