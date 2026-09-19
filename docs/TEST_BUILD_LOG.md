@@ -34,7 +34,7 @@ This file records numbered production candidates and research harnesses handed t
 
 ### 0.1.0 — 2026-09-20
 
-- Status: candidate
+- Status: superseded
 - Source branch: `dev/0.1.0`
 - Source SHA: `8c903a317c041d6424c426c3033345a580b8d406`
 - Build mode: Release
@@ -54,8 +54,12 @@ This file records numbered production candidates and research harnesses handed t
   - wake/Back remain normal;
   - after wake, ordinary gameplay timing is normal;
   - repeat one meditation session to confirm clean reset to 1×.
-- Result: pending user acceptance
-- Stable promotion: pending
+- Result:
+  - core 1×/2×/4× timing behavior worked;
+  - tip size/readability was acceptable;
+  - user observed rapid held-input repeat that made 2× difficult to select;
+  - gamepad speed controls displayed raw `(DLeft)/(DRight)` tokens and were visually unacceptable.
+- Stable promotion: no; superseded by 0.1.1
 
 ## Production candidate template
 
