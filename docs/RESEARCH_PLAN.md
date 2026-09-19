@@ -1,64 +1,28 @@
 # Research Plan
 
-## Goal
+## Status
 
-Close the remaining evidence gates before production implementation.
+**Closed for production implementation on 2026-09-20.**
 
-## Phase 1 — fixed timestep
+Static evidence and Research Harness 0.0.1 runtime evidence are recorded in:
+- `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`;
+- `docs/VERIFIED_RUNTIME_DATA.md`;
+- `docs/TEST_BUILD_LOG.md`.
 
-Determine the least-sufficient `Time.fixedDeltaTime` policy for meditation speeds 1×/2×/4×.
+## Accepted implementation contract
 
-Static checks:
-1. inspect meaningful Graveyard Keeper `FixedUpdate` consumers that remain active during meditation;
-2. identify any logic whose correctness depends materially on fixed-step size rather than elapsed scaled time;
-3. confirm whether scaling the fixed timestep with the meditation multiplier preserves vanilla semantics or causes skipped/oversized simulation steps.
+Production 0.1.0 should:
+- start each meditation session at 1×;
+- map 1×/2×/4× to timeScale 10/20/40;
+- scale fixedDeltaTime proportionally to 0.083333336/0.16666667/0.33333334;
+- use native SliderDec/SliderInc semantic callbacks;
+- suppress paired gamepad Left/Right navigation only while WaitingGUI owns those D-pad inputs;
+- initialize from the exact WaitingGUI button-tip event after vanilla waiting timing is installed;
+- preserve vanilla wake/Back behavior;
+- use the existing waiting-tip surface with improved readability;
+- restore ordinary timing through vanilla StopWaiting, with narrow defensive cleanup only for abnormal hide/plugin teardown;
+- avoid save mutation, EnvironmentEngine patches, sleep changes, ordinary-gameplay timing changes, and permanent polling.
 
-Runtime acceptance should compare at minimum:
-- vanilla 1×;
-- 2×;
-- 4×;
-- crossing midnight/day rollover;
-- waking manually after changing speed;
-- repeated open/change/close cycles;
-- scene/save lifecycle recovery if it can leave time settings modified.
+## Next step
 
-Measure/log effective `timeScale`, `fixedDeltaTime`, and observed frame/fixed-update behavior only as needed. Do not add permanent diagnostic polling to production.
-
-## Phase 2 — input/UI seam
-
-Prove the narrowest way to bind `GameKey.SliderDec` / `GameKey.SliderInc` to `WaitingGUI`.
-
-Preference order:
-1. reuse/replace the active GUI's native key delegate at meditation lifecycle initialization if practical and robust;
-2. intercept the existing semantic slider-key callbacks only for `WaitingGUI`;
-3. use a narrow `WaitingGUI.Update()` input check only if the event/delegate seams are materially worse.
-
-The selected design must:
-- work on keyboard and gamepad;
-- consume the input only while meditation is the active GUI;
-- preserve the vanilla wake/exit key;
-- update the visible speed indicator immediately;
-- avoid global recurring work.
-
-## Phase 3 — lifecycle safety
-
-Prove that all exits restore ordinary timing:
-- normal wake;
-- Back/close path;
-- repeated meditation sessions;
-- save/load or scene transition edge cases that can occur while waiting;
-- plugin failure/unload behavior where practical.
-
-Prefer vanilla restoration ownership. Add fallback cleanup only for a proven lifecycle gap; do not create a second timing owner unnecessarily.
-
-## Phase 4 — implementation candidate
-
-After phases 1–3 are closed:
-- create `dev/0.1.0` from the accepted research state;
-- implement only the proven mechanism;
-- add the minimal UI;
-- perform a clean Release build;
-- record exact source SHA and artifact hash in `docs/TEST_BUILD_LOG.md`;
-- hand the numbered candidate to the user for real-game acceptance.
-
-Hosted CI is not required for the research phases. Use it only when a concrete candidate build property needs proving.
+Create `dev/0.1.0` from the stable line, copy the accepted research conclusions, implement the minimal production mechanism, perform a clean Release build, record source SHA/artifact hash, and hand the candidate to the user for final in-game acceptance.
