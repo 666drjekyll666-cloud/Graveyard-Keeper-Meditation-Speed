@@ -130,7 +130,7 @@ This file records numbered production candidates and research harnesses handed t
 
 ### 1.0.0 — 2026-09-20
 
-- Status: release candidate
+- Status: accepted stable
 - Source branch: `dev/1.0.0`
 - Source SHA: `37964f2e17d52d2d81df9265778ff2b5ef21fe80`
 - Build mode: Release
@@ -151,8 +151,15 @@ This file records numbered production candidates and research harnesses handed t
   - start meditation and make one complete 1× -> 2× -> 4× -> 2× -> 1× pass;
   - confirm one press remains one step and the boundary arrows remain correct;
   - wake normally and confirm ordinary gameplay timing is normal.
-- Result: pending user acceptance
-- Stable promotion: pending
+- Result:
+  - the user confirmed the exact 1.0.0 candidate works correctly in the installed game;
+  - one-press-one-step input remains correct and comfortable;
+  - 1×/2×/4× presentation remains correct;
+  - normal meditation exit and ordinary gameplay timing remain correct;
+  - supplied runtime log confirms `Meditation Speed 1.0.0 loaded` and normal WaitingGUI open/close flow.
+- Stable promotion: authorized 2026-09-20; publish this exact tested DLL without rebuilding.
+- Stable distribution filename: `MeditationSpeed.dll`.
+- Stable binary SHA-256: `54888d085cefe957fc913e013b577da3890d31345956e62baeaf783c4af2bdfa`.
 
 ## Production candidate template
 
