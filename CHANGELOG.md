@@ -2,6 +2,12 @@
 
 All notable user-facing changes are documented here.
 
+## Unreleased — 1.0.0 candidate
+
+- Harden Harmony startup so the plugin patches its explicit assembly rather than relying on stack-frame assembly detection.
+- If Harmony initialization fails partway through on an unsupported/drifted runtime, roll back any patches already installed by this plugin before disabling it.
+- Meditation timing, controls, UI, save behavior, and fixed-timestep policy are unchanged from the accepted 0.1.2 runtime behavior.
+
 ## 0.1.2 — 2026-09-20
 
 First stable release.
