@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace MeditationSpeed
 {
+    // Production candidate 0.1.0: implementation derived only from accepted 1.407 research.
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class MeditationSpeedPlugin : BaseUnityPlugin
     {
