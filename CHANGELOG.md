@@ -4,6 +4,11 @@ All notable user-facing changes will be documented here.
 
 ## Unreleased
 
+### 0.1.2 candidate
+- Hide the unavailable left arrow at 1× and the unavailable right arrow at 4×.
+- Preserve fixed-width spacing so the rest of the meditation tip does not jump when speed changes.
+- Keep the accepted 0.1.1 timing, input release-gating, and lifecycle behavior unchanged.
+
 ### 0.1.1 candidate
 - Make one physical SliderDec/SliderInc press produce exactly one speed step by using Graveyard Keeper's native `LazyInput.WaitForRelease` gate.
 - Block the paired Left/Right logical key until the same physical direction is released, preventing D-pad navigation leakage without polling.
