@@ -3,7 +3,7 @@ name: Candidate Build
 on:
   push:
     branches:
-      - dev/0.1.1
+      - dev/0.1.2
     paths:
       - MeditationSpeed.csproj
       - src/**
@@ -31,13 +31,13 @@ jobs:
         run: dotnet build MeditationSpeed.csproj -c Release --no-restore
 
       - name: Hash artifact
-        run: sha256sum bin/Release/MeditationSpeed.dll | tee MeditationSpeed-0.1.1.sha256
+        run: sha256sum bin/Release/MeditationSpeed.dll | tee MeditationSpeed-0.1.2.sha256
 
       - name: Upload candidate
         uses: actions/upload-artifact@v4
         with:
-          name: MeditationSpeed-0.1.1
+          name: MeditationSpeed-0.1.2
           path: |
             bin/Release/MeditationSpeed.dll
-            MeditationSpeed-0.1.1.sha256
+            MeditationSpeed-0.1.2.sha256
           if-no-files-found: error
