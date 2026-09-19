@@ -2,7 +2,7 @@
 
 Date: 2026-09-20
 
-Status: **runtime architecture accepted; startup fail-closed hardening implemented and cleanly built as the 1.0.0 release candidate. Runtime smoke acceptance remains.**
+Status: **closed and accepted for stable 1.0.0.**
 
 Target: Graveyard Keeper 1.407.
 
@@ -144,15 +144,15 @@ Verdict: **accepted.**
 - no recurring hosted CI workflow remains after release;
 - no debug/probe harness code is present in production.
 
-For 1.0.0, the exact candidate source must receive one clean Release build and the resulting DLL must be runtime-smoke-tested because startup code changed.
+The exact 1.0.0 candidate source received a clean Release build and the resulting DLL passed the installed-game smoke test. No rebuild is required for release.
 
 ## Repository hygiene
 
-Verdict: **accepted with one non-runtime note.**
+Verdict: **accepted.**
 
 The public README is user-facing; research details are kept in dedicated docs. No TODO/FIXME/debug logging residue was found in production source.
 
-There is currently no LICENSE file. This is not a runtime/release-safety defect: without an explicit license, source reuse is simply not granted by default. Add a license only if explicit reuse permissions are desired.
+The repository is licensed under the MIT License. That license covers the project's own source; proprietary Graveyard Keeper material inspected as research evidence is not copied into the production repository.
 
 ## Final audit decision
 
@@ -168,4 +168,4 @@ Do **not**:
 
 The 1.0.0 candidate built Release with 0 warnings / 0 errors from source SHA `37964f2e17d52d2d81df9265778ff2b5ef21fe80`; DLL SHA-256 is `54888d085cefe957fc913e013b577da3890d31345956e62baeaf783c4af2bdfa`.
 
-The only remaining acceptance gate is a short installed-game smoke test of that exact DLL to confirm plugin load, one-step input, 1×/2×/4× timing, UI, and wake restoration after the startup-only hardening.
+The exact candidate passed the installed-game smoke test: plugin startup succeeded, one-step input and the 1×/2×/4× UI remained correct, meditation exited normally, and the user explicitly accepted the candidate for stable release. No technical audit gate remains open.
