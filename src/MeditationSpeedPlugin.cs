@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace MeditationSpeed
 {
-    // Production candidate 0.1.1: accepted timing model plus release-gated native slider input.
+    // Production candidate 0.1.2: accepted timing/input model with boundary-aware speed indicator.
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class MeditationSpeedPlugin : BaseUnityPlugin
     {
         public const string PluginGuid = "nikich.gyk.meditationspeed";
         public const string PluginName = "Meditation Speed";
-        public const string PluginVersion = "0.1.1";
+        public const string PluginVersion = "0.1.2";
 
         private Harmony _harmony;
 
@@ -235,7 +235,9 @@ namespace MeditationSpeed
             // GameKeyTip renders D-pad slider bindings as the raw tokens
             // "(DLeft)" / "(DRight)" in this UI font. Use language-neutral
             // chevrons instead of introducing custom textures or atlas state.
-            string speedPart = "<  " + SpeedLabels[_speedIndex] + "  >";
+            string leftArrow = _speedIndex > 0 ? "<" : " ";
+            string rightArrow = _speedIndex < SpeedLabels.Length - 1 ? ">" : " ";
+            string speedPart = leftArrow + "  " + SpeedLabels[_speedIndex] + "  " + rightArrow;
             string text = string.IsNullOrEmpty(_vanillaWakeText)
                 ? speedPart
                 : speedPart + "     " + _vanillaWakeText;
