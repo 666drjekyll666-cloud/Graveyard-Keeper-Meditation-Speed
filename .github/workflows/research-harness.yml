@@ -1,0 +1,43 @@
+name: Research Harness Build
+
+on:
+  push:
+    branches:
+      - research/fixed-timestep-and-ui-seam
+    paths:
+      - MeditationSpeedResearchHarness.csproj
+      - research/harness/**
+      - .github/workflows/research-harness.yml
+  workflow_dispatch:
+
+jobs:
+  build-harness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore MeditationSpeedResearchHarness.csproj
+
+      - name: Build Release
+        run: dotnet build MeditationSpeedResearchHarness.csproj -c Release --no-restore
+
+      - name: Hash artifact
+        run: sha256sum bin/Release/MeditationSpeedResearchHarness.dll | tee research-harness.sha256
+
+      - name: Upload harness
+        uses: actions/upload-artifact@v4
+        with:
+          name: MeditationSpeedResearchHarness-0.0.1
+          path: |
+            bin/Release/MeditationSpeedResearchHarness.dll
+            research-harness.sha256
+          if-no-files-found: error
