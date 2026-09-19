@@ -128,6 +128,32 @@ This file records numbered production candidates and research harnesses handed t
 - Release asset digest reported by GitHub: `sha256:c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`.
 - Publication reused the exact accepted CI artifact; no rebuild was performed.
 
+### 1.0.0 — 2026-09-20
+
+- Status: release candidate
+- Source branch: `dev/1.0.0`
+- Source SHA: `37964f2e17d52d2d81df9265778ff2b5ef21fe80`
+- Build mode: Release
+- Build result: 0 warnings, 0 errors
+- Workflow run: `35476504005`
+- Artifact ID: `10594291711`
+- Artifact ZIP digest: `sha256:139aaf2fa64bf9967ff59abe4b97f4b62ba0f2d88410f1ea6ee649c1b8d40216`
+- Artifact: `MeditationSpeed.dll`
+- DLL SHA-256: `54888d085cefe957fc913e013b577da3890d31345956e62baeaf783c4af2bdfa`
+- Purpose: pre-1.0 audit hardening plus semantic version promotion.
+- Runtime behavior changes from accepted 0.1.2:
+  - none in meditation timing, input, UI, or lifecycle behavior;
+  - startup now patches the explicit plugin assembly;
+  - initialization failure rolls back this plugin's partial Harmony patches before disabling.
+- Requested runtime smoke test:
+  - replace 0.1.2 with this 1.0.0 candidate;
+  - confirm the log reports `Meditation Speed 1.0.0 loaded`;
+  - start meditation and make one complete 1× -> 2× -> 4× -> 2× -> 1× pass;
+  - confirm one press remains one step and the boundary arrows remain correct;
+  - wake normally and confirm ordinary gameplay timing is normal.
+- Result: pending user acceptance
+- Stable promotion: pending
+
 ## Production candidate template
 
 ### X.Y.Z — YYYY-MM-DD
