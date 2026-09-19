@@ -82,6 +82,7 @@ Production should:
 - gate by active WaitingGUI + exact button-tips instance;
 - preserve the localized vanilla wake text;
 - show the current `1×/2×/4×` with language-neutral directional chevrons; raw SliderDec/SliderInc gamepad tokens render as `(DLeft)/(DRight)` in this UI font and are not suitable for final presentation;
+- hide the unavailable direction at the speed boundaries: no left arrow at 1× and no right arrow at 4×; retain spacing so adjacent vanilla tip content does not shift;
 - improve readability relative to the research harness; user feedback was that the harness text was too small;
 - redraw only on speed changes.
 
