@@ -4,115 +4,105 @@
 
 - Game: Graveyard Keeper 1.407
 - Runtime: PC / Unity / BepInEx + Harmony
-- Evidence snapshot: 2026-09-19
+- Evidence accepted: 2026-09-20
 
-## Version evidence
+Primary static evidence repository: `Kupie/GYK_DECOMP`, commit `6abf79199d92482af1c7573870dd9a20ec2270b9`.
 
-The inspected 1.407 decompilation reports:
-- `LazyConsts.VERSION = 1.407f`
-- `LazyConsts.VERSION_INT = 1407f`
-
-Primary inspected evidence repository: `Kupie/GYK_DECOMP`, commit `6abf79199d92482af1c7573870dd9a20ec2270b9`.
+Runtime acceptance artifact: Research Harness 0.0.1, source SHA `3e5fd476584eb8749a98ca58b1b3ffa575b1d9bc`, DLL SHA-256 `b5dcffd79c099d33b068e9345ec30f5024ec33ee4babde7af884f84eccf83b92`.
 
 This repository does not contain copied game source.
 
 ## Meditation owner and lifecycle
 
-Verified in Graveyard Keeper 1.407:
-
+Verified:
 - meditation waiting is owned by `WaitingGUI`;
-- when waiting becomes active, vanilla sets `Time.timeScale = 10f`;
-- vanilla sets `Time.fixedDeltaTime = 0.083333336f`;
+- vanilla waiting sets `Time.timeScale = 10f`;
+- vanilla waiting sets `Time.fixedDeltaTime = 0.083333336f`;
 - `WaitingGUI.StopWaiting()` restores `Time.timeScale = 1f`;
 - `WaitingGUI.StopWaiting()` restores `Time.fixedDeltaTime = 0.016666668f`;
-- the normal wake/exit input is `GameKey.Interaction`;
-- the Back handler also routes through `StopWaiting()`.
+- Interaction wakes normally;
+- Back routes through `StopWaiting()`.
+
+Runtime normal-exit probes returned `restore_ok=true`.
+
+## Accepted production speed mapping
+
+| UI speed | timeScale | fixedDeltaTime |
+| --- | ---: | ---: |
+| 1× | 10 | 0.083333336 |
+| 2× | 20 | 0.16666667 |
+| 4× | 40 | 0.33333334 |
+
+The proportional fixed-step policy preserves approximately the vanilla-meditation real-time fixed callback rate (~120/s).
+
+Runtime at 4×:
+- proportional: ~119.94 and ~120.18 fixed callbacks/s;
+- bounded step: ~239.92/s;
+- vanilla meditation step: ~480.06/s.
+
+The user reported no visual/simulation anomaly under any tested policy. The 4× proportional boundary is accepted.
 
 ## Native simulation behavior
 
 `WaitingGUI.Update()` restores energy and HP from scaled `Time.deltaTime`.
 
-`EnvironmentEngine.Update()` advances world time using scaled `Time.deltaTime` (`_cur_time += deltaTime / 225f`) and performs normal end-of-day processing when the day rolls over.
+`EnvironmentEngine.Update()` advances world time from scaled `Time.deltaTime`.
 
-Therefore the preferred architecture is to change meditation's native time scale rather than separately rewriting world time, resource recovery, crops, NPC schedules, crafting, weather, or other simulation systems.
+Therefore production changes meditation's native timing inputs only. It does not reimplement world time, recovery, crops, NPCs, crafting, weather, or other simulation systems.
 
-User-facing speed mapping accepted for research:
+## Input
 
-| UI speed | Unity timeScale |
-| --- | ---: |
-| 1× | 10 |
-| 2× | 20 |
-| 4× | 40 |
+Accepted native controls:
+- decrease: `GameKey.SliderDec` = A / Left Arrow / D-pad Left;
+- increase: `GameKey.SliderInc` = D / Right Arrow / D-pad Right.
 
-## Fixed-step static evidence
+Accepted seam:
+- semantic `BaseGUI.OnPressedSliderDec/Inc` patches;
+- effect only for active WaitingGUI in Waiting state;
+- no custom recurring keyboard/gamepad poll.
 
-The meaningful direct fixed-step surface found in 1.407 is narrow:
-- `CustomUpdateManager.FixedUpdate()` -> active WGO `CustomFixedUpdate()`;
-- world-object fixed components: `MovementComponent` and `KickComponent`;
-- separate `DropsList.FixedUpdate()`.
+Runtime found paired gamepad Left/Right navigation also fires from the same D-pad input. Production must suppress that paired navigation while WaitingGUI owns the slider input.
 
-Some movement/kick/drop behavior is per fixed call rather than fully delta-normalized. Therefore `fixedDeltaTime` changes both scheduling cost and some transient physics behavior.
+## UI
 
-Approximate scheduling:
+Accepted lifecycle event:
+- the WaitingGUI single-tip `ButtonTipsStr.Print(GameKeyTip)` occurs after vanilla installs waiting timing.
 
-| State | timeScale | fixedDeltaTime | FixedUpdate / real sec |
-| --- | ---: | ---: | ---: |
-| Normal | 1 | 0.016666668 | ~60 |
-| Vanilla meditation | 10 | 0.083333336 | ~120 |
-| 2× unchanged fixed step | 20 | 0.083333336 | ~240 |
-| 4× unchanged fixed step | 40 | 0.083333336 | ~480 |
-| 2× proportional | 20 | 0.16666667 | ~120 |
-| 4× proportional | 40 | 0.33333334 | ~120 |
+Production should:
+- gate by active WaitingGUI + exact button-tips instance;
+- preserve the localized vanilla wake text;
+- add language-neutral native slider icons and current `1×/2×/4×`;
+- improve readability relative to the research harness; user feedback was that the harness text was too small;
+- redraw only on speed changes.
 
-The proportional policy is now the leading candidate, but remains runtime-unaccepted because the 4× game-time fixed step is coarser.
+Do not use the harness's broad inherited `Open` hook in production.
 
-Detailed evidence: `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`.
+## Longer Days runtime compatibility
 
-## Input evidence
+The acceptance run used Longer Days 1.7.1 with Day Length = 675.
 
-`BaseGUI` routes native game keys while a GUI is active through `gamekey_delegates`.
+Adjusted expected world rate:
+- 1×: ~6.6667;
+- 4×: ~26.6667.
 
-Candidate meditation speed controls:
-- `GameKey.SliderDec` = A / Left Arrow / D-pad Left
-- `GameKey.SliderInc` = D / Right Arrow / D-pad Right
+Observed clean samples:
+- 1×: 6.6613;
+- 4×: 26.6164 / 26.6666 / 26.6773 / 26.6415.
 
-The base `OnPressedSliderDec/Inc` handlers are virtual and currently return false; no stock overrides were found.
+This supports compatibility with Longer Days' changed day length: meditation acceleration composes with it rather than overriding it.
 
-Current static-preferred seam: patch those two semantic handlers and gate behavior to active `WaitingGUI` state. This avoids independent per-frame input polling and reflection into the delegate dictionary.
+## Other compatibility evidence
 
-The same physical controls also emit logical Left/Right. Runtime must verify that WaitingGUI's gamepad navigation does not act on the paired logical key.
-
-## UI evidence
-
-WaitingGUI prints its vanilla wake tip only after entering `Waiting` and setting vanilla timeScale/fixedDeltaTime.
-
-Current static-preferred one-shot presentation seam: exact-instance-gated postfix on the single-tip `ButtonTipsStr.Print(GameKeyTip)` call used by WaitingGUI, preserving the already rendered wake text and adding native SliderDec/SliderInc icons plus the current speed.
-
-This avoids a permanent UI poll but remains runtime-unaccepted because `ButtonTipsStr` is shared infrastructure.
-
-## Compatibility evidence
-
-### Exhaust-less
-Current `p1xel8ted/Graveyard-Keeper-Mods` patches `WaitingGUI.Update()` and directly adds HP/energy using scaled `Time.deltaTime`. Higher meditation timeScale will therefore also accelerate its added recovery.
-
-### Where's Ma Storage
-Current source patches `WaitingGUI.Open` only to invalidate its own inventory cache. No timing mutation found.
-
-### Back From The Grave
-Current source owns fast-forward timing for `SleepGUI`. No `WaitingGUI` patch was found.
+- Exhaust-less: direct extra HP/energy uses scaled `Time.deltaTime`; enabling its meditation speed-up alongside this mod will compound recovery behavior.
+- Where's Ma Storage: current WaitingGUI.Open patch only invalidates its own inventory cache; no timing conflict found.
+- Back From The Grave: current fast-forward timing targets SleepGUI; no WaitingGUI timing patch found.
 
 ## Acceptance status
 
-Accepted:
-- native owner and normal lifecycle;
-- 1×/2×/4× timeScale mapping as the research target;
-- host-native architecture direction;
-- native input candidates;
-- static inventory of relevant fixed-step consumers;
-- static compatibility findings above.
-
-Runtime-open:
-- final fixed timestep policy;
-- exact UI/input seam acceptance;
-- paired gamepad Left/Right behavior;
-- whether abnormal WaitingGUI exits require any fallback cleanup.
+Research gates closed for production candidate implementation:
+- fixed timestep: accepted;
+- native slider input: accepted;
+- gamepad duplicate navigation: mitigation defined;
+- waiting-start UI seam: accepted with readability adjustment;
+- normal restoration: accepted;
+- narrow abnormal-exit cleanup: required defensively, no global watchdog.
