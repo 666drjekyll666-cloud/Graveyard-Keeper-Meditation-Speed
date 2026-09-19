@@ -1,193 +1,150 @@
-# Fixed Timestep and UI/Input Static Research — 2026-09-19
+# Fixed Timestep and UI/Input Research — accepted 2026-09-20
 
-Status: **static evidence complete; runtime validation still required for the fixed-timestep policy and the proposed input/UI seams.**
+Status: **accepted for production implementation**.
 
-Game target: Graveyard Keeper 1.407.
+Target: Graveyard Keeper 1.407.
 
-Primary game-code evidence: `Kupie/GYK_DECOMP` commit `6abf79199d92482af1c7573870dd9a20ec2270b9`.
+Primary static evidence: `Kupie/GYK_DECOMP` commit `6abf79199d92482af1c7573870dd9a20ec2270b9`.
+
+Runtime evidence: Research Harness 0.0.1, source SHA `3e5fd476584eb8749a98ca58b1b3ffa575b1d9bc`, DLL SHA-256 `b5dcffd79c099d33b068e9345ec30f5024ec33ee4babde7af884f84eccf83b92`.
 
 No decompiled game source is copied into this repository.
 
-## 1. FixedUpdate ownership in 1.407
+## Accepted fixed-timestep policy
 
-The game's direct fixed-step surface is much smaller than a broad Unity-wide assumption would suggest.
+Production mapping:
 
-`CustomUpdateManager.FixedUpdate()`:
-- runs only while the game is started and not paused;
-- iterates active `WorldGameObject` instances;
-- calls `WorldGameObject.CustomFixedUpdate()`.
-
-`WorldGameObject.CustomFixedUpdate()` delegates to `ComponentsManager.FixedUpdate()`.
-
-Only two world-object components override `HasFixedUpdate()`:
-- `MovementComponent`;
-- `KickComponent`.
-
-A separate `DropsList.FixedUpdate()` advances active drop objects.
-
-### MovementComponent
-
-Movement uses the fixed-step argument in actual displacement and pathfinding thresholds. Some acceleration/friction operations are per fixed call rather than fully normalized by elapsed time.
-
-Consequences:
-- keeping the vanilla meditation fixed step while raising `timeScale` preserves vanilla per-step spatial granularity but increases real-time FixedUpdate frequency;
-- increasing `fixedDeltaTime` with the speed multiplier preserves the real-time callback budget but makes each simulated movement step coarser.
-
-### KickComponent / DropsList
-
-`KickComponent` contains per-step friction such as `delta_vec *= 0.96f`, then applies displacement using the fixed delta.
-
-`DropResGameObject.FixedUpdateMe()` also performs some per-fixed-call state changes, including collider-radius growth.
-
-Therefore `fixedDeltaTime` is not merely a CPU knob. Different policies change both scheduling cost and some transient physics behavior.
-
-## 2. Unity scheduling semantics
-
-Unity documents that `fixedDeltaTime` is an interval in **game time affected by `timeScale`**.
-
-Unity's timeScale guidance also demonstrates multiplying `fixedDeltaTime` by the time scale when the goal is to keep the number of FixedUpdate callbacks per real-time interval approximately constant. Unity explicitly notes that whether this adjustment is desirable is game-specific.
-
-For Graveyard Keeper:
-
-| State | timeScale | fixedDeltaTime | Approx. fixed calls / real second |
+| UI speed | timeScale | fixedDeltaTime | Target fixed callbacks / real second |
 | --- | ---: | ---: | ---: |
-| Normal gameplay | 1 | 0.016666668 | 60 |
-| Vanilla meditation | 10 | 0.083333336 | 120 |
-| 2×, unchanged med step | 20 | 0.083333336 | 240 |
-| 4×, unchanged med step | 40 | 0.083333336 | 480 |
-| 2×, proportional step | 20 | 0.16666667 | 120 |
-| 4×, proportional step | 40 | 0.33333334 | 120 |
-| 4×, bounded middle step | 40 | 0.16666667 | 240 |
+| 1× | 10 | 0.083333336 | ~120 |
+| 2× | 20 | 0.16666667 | ~120 |
+| 4× | 40 | 0.33333334 | ~120 |
 
-The proportional policy is the leading candidate because it preserves vanilla-meditation callback demand and keeps per-fixed-call effects approximately stable in real time.
+Static inspection found that the meaningful direct fixed-step surface in 1.407 is narrow:
+- `CustomUpdateManager.FixedUpdate()` -> active WGO `CustomFixedUpdate()`;
+- fixed WGO components: `MovementComponent` and `KickComponent`;
+- separate `DropsList.FixedUpdate()`.
 
-It is **not yet accepted** because the 4× step of ~0.3333 game seconds is four times coarser than vanilla meditation and may affect movement/path/collision granularity.
+Some movement/kick/drop behavior is per fixed call rather than fully delta-normalized, so increasing the fixed step is a real simulation trade-off rather than only a CPU optimization.
 
-Runtime comparison is required before freezing the policy.
+The runtime comparison resolved that trade-off:
 
-## 3. World-time semantics
+| Probe | Measured fixed callbacks / real second | User-visible result |
+| --- | ---: | --- |
+| 4× proportional, fixed 0.33333334 | ~119.94 / ~120.18 | no anomaly reported |
+| 4× bounded, fixed 0.16666667 | ~239.92 | no anomaly reported |
+| 4× vanilla med step, fixed 0.083333336 | ~480.06 | no anomaly reported |
 
-`EnvironmentEngine.Update()` advances `_cur_time` from scaled `Time.deltaTime` and performs normal end-of-day processing.
+The proportional candidate preserves vanilla-meditation callback demand instead of multiplying fixed-step work by 2×/4×. The highest/coarsest boundary (4×) was exercised twice without a reported movement, collision, NPC, or general simulation problem. Under the test-matrix boundary rule, a separate long 2× probe is not required because 2× uses the same control path and a less coarse fixed step.
 
-The fixed-step policy therefore should not alter the intended world-time multiplier directly. A runtime probe will still verify that measured world progression tracks the selected 1×/2×/4× meditation multiplier and survives a day rollover.
+Decision: **accept proportional fixedDeltaTime scaling**.
 
-## 4. Native input seam
+## World-time behavior and Longer Days
 
-`BaseGUI.Init()` creates a native `gamekey_delegates` map. It includes:
+The runtime environment had Longer Days 1.7.1 configured to a 675-second day instead of vanilla 450 seconds.
+
+Therefore the harness's vanilla-only `expected_world_rate` field is not the correct absolute expectation for that runtime. With a 1.5× longer day, expected effective world progression is reduced by 450/675 = 2/3.
+
+At 4× the expected effective rate is therefore ~26.6667. Runtime samples measured:
+- 26.6164;
+- 26.6666;
+- 26.6773;
+- 26.6415.
+
+A later clean 1× sample measured 6.6613 against a Longer-Days-adjusted target of ~6.6667.
+
+Decision: changing only meditation's native time scale preserves Longer Days semantics. This is positive runtime compatibility evidence for Longer Days 1.7.1.
+
+## Accepted input seam
+
+`BaseGUI.Init()` routes:
 - `GameKey.SliderDec -> OnPressedSliderDec`;
 - `GameKey.SliderInc -> OnPressedSliderInc`.
 
-The base slider handlers are virtual and currently return `false`. No stock override was found.
+Production may patch those semantic handlers, gated to the active `WaitingGUI` in `Waiting` state.
 
-This gives a low-recurring-cost candidate seam:
+Runtime proved:
+- keyboard SliderInc changed 1× -> 2× -> 4×;
+- gamepad D-pad changed the same native SliderInc/SliderDec path;
+- no independent keyboard polling is required.
 
-- Harmony-patch `BaseGUI.OnPressedSliderDec()` and `BaseGUI.OnPressedSliderInc()`;
-- act only when `__instance` is the active `WaitingGUI` in state `Waiting`;
-- change the selected meditation speed;
-- return `true` so BaseGUI consumes the corresponding slider logical key.
+### Paired Left/Right finding
 
-Advantages:
-- reuses Graveyard Keeper's own keyboard/gamepad abstraction;
-- no independent keyboard hotkeys;
-- no new `WaitingGUI.Update()` polling;
-- no reflection into the protected `gamekey_delegates` field;
-- effect is gated to one GUI type/state.
+The same physical controls also emit logical Left/Right.
 
-### Shared physical bindings
+Runtime:
+- keyboard paired Right returned false;
+- gamepad paired Left/Right returned true, meaning WaitingGUI's gamepad navigation path also ran.
 
-The same physical inputs also map to logical Left/Right:
-- A / Left Arrow / D-pad Left -> both `Left` and `SliderDec`;
-- D / Right Arrow / D-pad Right -> both `Right` and `SliderInc`.
+No visible defect was reported, but production should not allow a hidden second action.
 
-BaseGUI will therefore see both logical keys in the same frame.
+Decision: in active WaitingGUI, suppress paired gamepad Left/Right navigation while SliderDec/SliderInc owns D-pad Left/Right.
 
-For keyboard input, BaseGUI's Left/Right navigation handlers return false when gamepad mode is not active.
+This remains event-driven and adds no permanent polling.
 
-For gamepad input, whether the paired Left/Right handler has any effect depends on the WaitingGUI gamepad-navigation state. This is a runtime acceptance item. Production must not rely on dictionary iteration order.
+## Accepted waiting-start / presentation seam
 
-## 5. Visible speed indicator
+WaitingGUI prints its vanilla wake tip after it:
+1. enters `Waiting`;
+2. installs vanilla `timeScale=10`;
+3. installs vanilla `fixedDeltaTime=0.083333336`.
 
-WaitingGUI's vanilla transition into active waiting performs, in order:
-1. state -> `Waiting`;
-2. invokes the start callback;
-3. sets vanilla `timeScale`;
-4. sets vanilla `fixedDeltaTime`;
-5. calls `button_tips.Print(GameKeyTip.Interaction/"wake up")`.
+The Research Harness successfully used the single-tip `ButtonTipsStr.Print(GameKeyTip)` event to initialize speed control and redraw the waiting tip without recurring UI work.
 
-That final print is the first narrow event after vanilla has established the waiting clock.
+Important harness finding: resolving `WaitingGUI.Open` by inherited method name patched the base `BaseGUI.Open` implementation and produced unrelated `event=open` observations for other GUIs. Production must **not** copy that broad Open hook.
 
-A candidate one-shot presentation seam is a postfix on the single-tip `ButtonTipsStr.Print(GameKeyTip)` overload, gated by exact identity with `WaitingGUI.button_tips`.
+Production start detection should instead use the button-tip event and gate it by:
+- current `BaseGUI.active_gui` being `WaitingGUI`;
+- WaitingGUI state being `Waiting`;
+- the printed `ButtonTipsStr` being that active WaitingGUI's own `button_tips`.
 
-The postfix can:
-- preserve the vanilla localized wake text already rendered;
-- add native `GameKeyTip.GetIcon(SliderDec/SliderInc)` icons;
-- insert the current raw speed text;
-- perform no recurring polling.
+User feedback: the harness indicator functioned correctly but its text was too small.
 
-Speed changes can redraw the same label immediately from the slider handlers.
+Decision: keep the native button-tip surface, but make the production waiting tip more readable (target ~25% larger than its original waiting-tip text) and use language-neutral speed content such as native left/right icons plus `1×/2×/4×`.
 
-This target is shared infrastructure, so runtime validation must confirm the exact-instance gate has no unrelated UI effect. A broad per-frame UI patch is not justified while this event seam works.
+## Lifecycle acceptance
 
-## 6. Lifecycle findings
+Two tested normal exits recorded:
+- pre-stop accelerated timing;
+- post-stop `timeScale=1`;
+- post-stop `fixedDeltaTime=0.016666668`;
+- `restore_ok=true`.
 
-Vanilla `WaitingGUI.StopWaiting()` synchronously restores:
-- `Time.timeScale = 1f`;
-- `Time.fixedDeltaTime = 0.016666668f`;
+Decision:
+- vanilla `WaitingGUI.StopWaiting()` remains the primary restoration owner;
+- do not add a recurring watchdog;
+- add only narrow defensive cleanup for an active WaitingGUI being hidden without StopWaiting and for plugin teardown, so modified global timing cannot leak outside the session.
 
-before the fade-out and `Hide(false)`.
-
-Normal start/load initialization also writes the normal `fixedDeltaTime`.
-
-Static inspection does not show a universal normal-`timeScale` reset on every conceivable load/scene path. That does **not** justify a global watchdog.
-
-Runtime evidence should first test:
-- Interaction wake;
-- Back wake;
-- repeated open/change/close;
-- exact values at `StopWaiting` completion and `WaitingGUI.Hide`;
-- one safe load/scene lifecycle case if it can occur while waiting.
-
-Only add fallback cleanup if an actual bypass of vanilla restoration is demonstrated.
-
-## 7. Compatibility research
+## Compatibility notes
 
 ### Exhaust-less
 
-Current `p1xel8ted/Graveyard-Keeper-Mods` patches `WaitingGUI.Update()` for:
-- auto-wake;
-- direct HP/energy acceleration.
+Current Exhaust-less adds HP/energy directly from scaled `Time.deltaTime` in `WaitingGUI.Update()`.
 
-Its speed-up path adds HP/energy using scaled `Time.deltaTime`.
-
-Implication: when both mods are enabled, Meditation Speed's higher `timeScale` also scales Exhaust-less's extra recovery. This is a behavioral interaction even though the Harmony seams need not directly conflict.
-
-Do not claim transparent compatibility with Exhaust-less Speed Up Meditation enabled.
+Higher meditation timeScale will also accelerate that extra recovery. Do not claim transparent compatibility with Exhaust-less's meditation speed-up enabled.
 
 ### Where's Ma Storage
 
-Current source has a `WaitingGUI.Open` prefix used only to invalidate its own inventory cache. No timing or meditation-state mutation was found.
+Its current `WaitingGUI.Open` prefix invalidates only its own inventory cache. No timing mutation found.
 
-No direct conflict is currently indicated.
+No direct conflict indicated.
 
 ### Back From The Grave
 
-Current multiplayer timing ownership is attached to `SleepGUI`, including its own sleep `timeScale/fixedDeltaTime` policy.
+Its current fast-forward timing ownership is attached to `SleepGUI`; no `WaitingGUI` patch was found.
 
-No `WaitingGUI` patch was found in the inspected current source. No direct meditation-clock conflict is currently indicated.
+No direct meditation-clock conflict indicated.
 
-## 8. Runtime gate
+### Longer Days
 
-One research-only harness should now prove:
-- actual fixed-callback rate under the candidate policies;
-- frame stability during short probes;
-- measured world-time progression ratio;
-- 4× movement/physics does not show an obvious failure under the proportional candidate;
-- native SliderDec/SliderInc dispatch works on keyboard and gamepad;
-- paired Left/Right produces no unwanted WaitingGUI action;
-- the speed indicator renders correctly;
-- wake/Back restores normal timing.
+Runtime evidence with Longer Days 1.7.1 / day length 675 showed the expected longer-day world progression at all completed boundary probes. The meditation multiplier composes correctly with its changed day length.
 
-Until that evidence exists:
-- do not create `dev/0.1.0`;
-- do not freeze the fixed-timestep policy;
-- do not call the UI/input seam production-accepted.
+## Production constraints carried forward
+
+- each meditation session starts at vanilla-relative 1×;
+- no save-data mutation;
+- no global/per-frame input polling;
+- no EnvironmentEngine patch;
+- no sleep or ordinary-gameplay timing changes;
+- wake/Back remain vanilla;
+- proportional fixedDeltaTime mapping is frozen unless new runtime evidence disproves it.
