@@ -2,27 +2,30 @@
 
 ## Status
 
-**Closed for production implementation on 2026-09-20.**
+**Closed and accepted for stable 0.1.2 on 2026-09-20.**
 
 Static evidence and Research Harness 0.0.1 runtime evidence are recorded in:
 - `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`;
 - `docs/VERIFIED_RUNTIME_DATA.md`;
 - `docs/TEST_BUILD_LOG.md`.
 
-## Accepted implementation contract
+## Accepted production contract
 
-Production 0.1.0 should:
-- start each meditation session at 1×;
-- map 1×/2×/4× to timeScale 10/20/40;
-- scale fixedDeltaTime proportionally to 0.083333336/0.16666667/0.33333334;
-- use native SliderDec/SliderInc semantic callbacks;
-- suppress paired gamepad Left/Right navigation only while WaitingGUI owns those D-pad inputs;
-- initialize from the exact WaitingGUI button-tip event after vanilla waiting timing is installed;
-- preserve vanilla wake/Back behavior;
-- use the existing waiting-tip surface with improved readability;
-- restore ordinary timing through vanilla StopWaiting, with narrow defensive cleanup only for abnormal hide/plugin teardown;
-- avoid save mutation, EnvironmentEngine patches, sleep changes, ordinary-gameplay timing changes, and permanent polling.
+Stable 0.1.2:
+- starts each meditation session at 1×;
+- maps 1×/2×/4× to timeScale 10/20/40;
+- scales fixedDeltaTime proportionally to 0.083333336/0.16666667/0.33333334;
+- uses native SliderDec/SliderInc semantic callbacks;
+- uses native `LazyInput.WaitForRelease` so one physical press produces one speed step even under accelerated scaled time;
+- suppresses paired gamepad Left/Right navigation only while WaitingGUI owns those D-pad inputs;
+- initializes from the exact WaitingGUI button-tip event after vanilla waiting timing is installed;
+- preserves vanilla wake/Back behavior;
+- uses the existing waiting-tip surface, with boundary-aware `1×/2×/4×` presentation;
+- restores ordinary timing through vanilla StopWaiting, with narrow defensive cleanup for abnormal hide/plugin teardown;
+- does not mutate save data, patch EnvironmentEngine for acceleration, change sleep speed, change ordinary-gameplay timing, or introduce permanent polling.
 
-## Next step
+## Acceptance
 
-Create `dev/0.1.0` from the stable line, copy the accepted research conclusions, implement the minimal production mechanism, perform a clean Release build, record source SHA/artifact hash, and hand the candidate to the user for final in-game acceptance.
+The 0.1.2 candidate was tested in the installed game and explicitly accepted by the user for stable promotion on 2026-09-20.
+
+No pre-release research gate remains open.
