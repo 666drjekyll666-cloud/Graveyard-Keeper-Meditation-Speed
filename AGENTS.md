@@ -109,7 +109,7 @@ For uncertain runtime behavior, use a narrow disposable diagnostic or user-opera
 ## Git, CI and acceptance
 
 - `main` is the accepted stable line.
-- Current accepted stable version: **0.1.2**.
+- Current accepted stable version: **1.0.0**.
 - Research and unaccepted runtime candidates stay off `main`.
 - Use `research/<topic>` for evidence gathering and `dev/<version>` when a build-bearing implementation line exists.
 - Do not consume a numbered version for research-only work.
@@ -117,6 +117,7 @@ For uncertain runtime behavior, use a narrow disposable diagnostic or user-opera
 - Before handing over a numbered DLL, require a clean Release build from the exact candidate source and record source SHA and artifact hash.
 - A handed numbered binary is immutable.
 - Accepted public releases follow the normal DevRules GitHub Release workflow.
+- Stable source is MIT-licensed; reverse-engineered/decompiled game material remains research evidence only and is not covered as project-owned source.
 
 ## Long-lived sources of truth
 
