@@ -61,6 +61,34 @@ This file records numbered production candidates and research harnesses handed t
   - gamepad speed controls displayed raw `(DLeft)/(DRight)` tokens and were visually unacceptable.
 - Stable promotion: no; superseded by 0.1.1
 
+### 0.1.1 — 2026-09-20
+
+- Status: candidate
+- Source branch: `dev/0.1.1`
+- Source SHA: `3c0080040c080e16804243fc1061d9be017476ba`
+- Build mode: Release
+- Build result: 0 warnings, 0 errors
+- Workflow run: `35474868310`
+- Artifact ID: `10593742451`
+- Artifact ZIP digest: `sha256:41fb59cda4d836b5654a217c2d2087ddc59a9b306539f6d38cdcdb66b43cf7e1`
+- Artifact: `MeditationSpeed.dll`
+- SHA-256: `fb92c10fec47b37d2174b713f060639bf1700ecae886faa68cde15c6ede28c30`
+- Purpose: fix scaled LazyInput hold-repeat and replace raw D-pad token presentation.
+- Input mechanism:
+  - after one native SliderDec/SliderInc action, use `LazyInput.WaitForRelease` for that slider key;
+  - gate the paired Left/Right logical key until the same physical direction is released;
+  - retain WaitingGUI-only Left/Right suppression as an ordering guard;
+  - no per-frame input polling and no arbitrary debounce timer.
+- UI: `< 1× >` / `< 2× >` / `< 4× >`; existing accepted tip scale retained.
+- Requested runtime checks:
+  - replace 0.1.0 with 0.1.1;
+  - keyboard and gamepad: each short press moves exactly one step 1× -> 2× -> 4× and back;
+  - holding one direction does not auto-repeat until it is released and pressed again;
+  - no `(DLeft)/(DRight)` text remains;
+  - wake/Back remain normal and a new meditation begins at 1×.
+- Result: pending user acceptance
+- Stable promotion: pending
+
 ## Production candidate template
 
 ### X.Y.Z — YYYY-MM-DD
