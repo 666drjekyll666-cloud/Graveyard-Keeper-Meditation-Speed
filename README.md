@@ -20,7 +20,7 @@ Uses Graveyard Keeper's native input abstraction:
 - increase speed: D / Right Arrow / gamepad D-pad Right
 - wake/exit: unchanged vanilla control
 
-The selected speed is shown in the existing meditation tip.
+The selected speed is shown in the existing meditation tip as a compact `< 1× >` / `< 2× >` / `< 4× >` control.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ No save data is modified.
 
 ## Status
 
-**0.1.0 development candidate. No public release yet.**
+**0.1.1 development candidate. No public release yet.**
 
 Accepted research is recorded in:
 - `docs/VERIFIED_RUNTIME_DATA.md`
