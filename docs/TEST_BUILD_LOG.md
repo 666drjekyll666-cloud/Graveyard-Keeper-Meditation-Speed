@@ -93,7 +93,7 @@ This file records numbered production candidates and research harnesses handed t
 
 ### 0.1.2 — 2026-09-20
 
-- Status: accepted stable
+- Status: historical accepted pre-1.0 build
 - Source branch: `dev/0.1.2`
 - Source SHA: `e0956b732fb73620b6d2942e8538eec18bcd6160`
 - Build mode: Release
@@ -119,9 +119,8 @@ This file records numbered production candidates and research harnesses handed t
   - switching remains exactly one step per physical press;
   - controls are comfortable on keyboard and gamepad;
   - overall behavior was explicitly accepted as stable.
-- Stable promotion: completed 2026-09-20.
-- Stable branch: `main`.
-- GitHub Release: `v0.1.2` (release ID `392249903`).
+- Historical promotion: completed 2026-09-20, later superseded by 1.0.0.
+- GitHub Release: `v0.1.2` (release ID `392249903`), now marked prerelease/pre-1.0.
 - Release target commit: `fcdaa777a7118b62aa9f7a2a47948468b158ec73`.
 - Stable distribution filename: `MeditationSpeed.dll`.
 - Stable binary SHA-256: `c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`.
@@ -157,9 +156,15 @@ This file records numbered production candidates and research harnesses handed t
   - 1×/2×/4× presentation remains correct;
   - normal meditation exit and ordinary gameplay timing remain correct;
   - supplied runtime log confirms `Meditation Speed 1.0.0 loaded` and normal WaitingGUI open/close flow.
-- Stable promotion: authorized 2026-09-20; publish this exact tested DLL without rebuilding.
+- Stable promotion: completed 2026-09-20.
+- Stable branch: `main`.
+- GitHub Release: `v1.0.0` (release ID `392254403`).
+- Release target commit: `2004e9cd9ec319b5b423f9179afb8265ed447d7f`.
 - Stable distribution filename: `MeditationSpeed.dll`.
 - Stable binary SHA-256: `54888d085cefe957fc913e013b577da3890d31345956e62baeaf783c4af2bdfa`.
+- Release asset digest reported by GitHub: `sha256:54888d085cefe957fc913e013b577da3890d31345956e62baeaf783c4af2bdfa`.
+- Publication reused the exact accepted CI artifact; no rebuild was performed.
+- License: MIT.
 
 ## Production candidate template
 
