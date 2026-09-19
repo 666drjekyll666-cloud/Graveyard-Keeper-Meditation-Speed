@@ -43,7 +43,7 @@ One physical press changes the speed by one step.
 
 ## Current release
 
-**0.1.2**
+**1.0.0**
 
 The accepted timing mapping is:
 
@@ -52,3 +52,7 @@ The accepted timing mapping is:
 | 1× | 10 | 0.083333336 |
 | 2× | 20 | 0.16666667 |
 | 4× | 40 | 0.33333334 |
+
+## License
+
+Meditation Speed is released under the **MIT License**. See `LICENSE` for the full text.
