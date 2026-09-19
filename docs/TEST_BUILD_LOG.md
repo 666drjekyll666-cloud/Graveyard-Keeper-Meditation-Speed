@@ -91,6 +91,32 @@ This file records numbered production candidates and research harnesses handed t
   - user requested one final presentation refinement: hide the unavailable left arrow at 1× and the unavailable right arrow at 4×.
 - Stable promotion: no; behavior accepted, superseded by 0.1.2 presentation refinement
 
+### 0.1.2 — 2026-09-20
+
+- Status: candidate
+- Source branch: `dev/0.1.2`
+- Source SHA: `e0956b732fb73620b6d2942e8538eec18bcd6160`
+- Build mode: Release
+- Build result: 0 warnings, 0 errors
+- Workflow run: `35475192930`
+- Artifact ID: `10593268313`
+- Artifact ZIP digest: `sha256:7f28eaea024762bffad47ca682a8e4aabaa5e104e0d4555ba35fa15b8f1bdcc5`
+- Artifact: `MeditationSpeed.dll`
+- SHA-256: `c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`
+- Purpose: final boundary-aware speed-indicator refinement on top of accepted 0.1.1 behavior.
+- UI:
+  - 1×: no left arrow; right arrow remains;
+  - 2×: both arrows remain;
+  - 4×: left arrow remains; no right arrow;
+  - missing boundary arrows are replaced by spacing so adjacent wake-tip content does not shift.
+- Runtime behavior: unchanged from accepted 0.1.1.
+- Requested runtime check:
+  - replace 0.1.1 with 0.1.2;
+  - confirm the three indicator states visually;
+  - confirm switching still works one press per step.
+- Result: pending user acceptance
+- Stable promotion: pending
+
 ## Production candidate template
 
 ### X.Y.Z — YYYY-MM-DD
