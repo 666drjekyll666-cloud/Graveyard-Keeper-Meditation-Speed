@@ -61,7 +61,17 @@ Accepted seam:
 - effect only for active WaitingGUI in Waiting state;
 - no custom recurring keyboard/gamepad poll.
 
-Runtime found paired gamepad Left/Right navigation also fires from the same D-pad input. Production must suppress that paired navigation while WaitingGUI owns the slider input.
+Runtime found paired gamepad Left/Right navigation also fires from the same D-pad input.
+
+Follow-up static inspection after 0.1.0 user feedback found the root cause of rapid multi-step speed changes: `LazyInput` treats SliderDec/SliderInc as hold-repeat keys. It starts repeating after 0.3 and then every 0.07, while `UpdateHolded` subtracts scaled `Time.deltaTime`. During meditation those intervals become extremely short in real time.
+
+Accepted mitigation for 0.1.1:
+- after handling one SliderDec/SliderInc event, call native `LazyInput.WaitForRelease` for that slider key;
+- also wait for release of the paired Left/Right key for the same physical direction;
+- retain WaitingGUI-only Left/Right suppression as a defensive ordering guard;
+- no custom polling or arbitrary debounce timer.
+
+This gives one physical press -> one speed step and reuses the host's own release lifecycle.
 
 ## UI
 
@@ -71,7 +81,7 @@ Accepted lifecycle event:
 Production should:
 - gate by active WaitingGUI + exact button-tips instance;
 - preserve the localized vanilla wake text;
-- add language-neutral native slider icons and current `1×/2×/4×`;
+- show the current `1×/2×/4×` with language-neutral directional chevrons; raw SliderDec/SliderInc gamepad tokens render as `(DLeft)/(DRight)` in this UI font and are not suitable for final presentation;
 - improve readability relative to the research harness; user feedback was that the harness text was too small;
 - redraw only on speed changes.
 
