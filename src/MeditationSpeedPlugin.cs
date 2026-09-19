@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace MeditationSpeed
 {
-    // Production candidate 0.1.0: implementation derived only from accepted 1.407 research.
+    // Production candidate 0.1.1: accepted timing model plus release-gated native slider input.
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class MeditationSpeedPlugin : BaseUnityPlugin
     {
         public const string PluginGuid = "nikich.gyk.meditationspeed";
         public const string PluginName = "Meditation Speed";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "0.1.1";
 
         private Harmony _harmony;
 
@@ -125,6 +125,12 @@ namespace MeditationSpeed
                 DrawTip();
             }
 
+            // Graveyard Keeper repeats SliderInc/SliderDec while held. Its repeat
+            // timers use scaled Time.deltaTime, so meditation timeScale makes the
+            // native repeat almost immediate in real time. Reuse the host's own
+            // release gate so one physical press always means one speed step.
+            RuntimeBindings.WaitForDirectionalRelease(direction);
+
             // Consume the semantic slider key even at the bounds.
             return true;
         }
@@ -226,10 +232,10 @@ namespace MeditationSpeed
             if (tips == null)
                 return;
 
-            string decIcon = RuntimeBindings.GetGameKeyIcon("SliderDec");
-            string incIcon = RuntimeBindings.GetGameKeyIcon("SliderInc");
-
-            string speedPart = decIcon + "  " + SpeedLabels[_speedIndex] + "  " + incIcon;
+            // GameKeyTip renders D-pad slider bindings as the raw tokens
+            // "(DLeft)" / "(DRight)" in this UI font. Use language-neutral
+            // chevrons instead of introducing custom textures or atlas state.
+            string speedPart = "<  " + SpeedLabels[_speedIndex] + "  >";
             string text = string.IsNullOrEmpty(_vanillaWakeText)
                 ? speedPart
                 : speedPart + "     " + _vanillaWakeText;
@@ -294,13 +300,18 @@ namespace MeditationSpeed
         internal static Type ButtonTipsType { get; private set; }
         internal static Type GameKeyTipType { get; private set; }
         internal static Type GameKeyType { get; private set; }
+        internal static Type LazyInputType { get; private set; }
 
         private static PropertyInfo _activeGuiProperty;
         private static PropertyInfo _buttonTipsProperty;
         private static FieldInfo _waitingStateField;
         private static FieldInfo _buttonTipsLabelField;
         private static PropertyInfo _labelTextProperty;
-        private static MethodInfo _getIconMethod;
+        private static MethodInfo _waitForReleaseMethod;
+        private static object _sliderDecKey;
+        private static object _sliderIncKey;
+        private static object _leftKey;
+        private static object _rightKey;
 
         internal static void Initialize()
         {
@@ -309,6 +320,7 @@ namespace MeditationSpeed
             ButtonTipsType = RequireType("ButtonTipsStr");
             GameKeyTipType = RequireType("GameKeyTip");
             GameKeyType = RequireType("GameKey");
+            LazyInputType = RequireType("LazyInput");
 
             _activeGuiProperty = AccessTools.Property(BaseGuiType, "active_gui")
                 ?? throw new MissingMemberException(BaseGuiType.FullName, "active_gui");
@@ -326,8 +338,18 @@ namespace MeditationSpeed
             _labelTextProperty = AccessTools.Property(uiLabelType, "text")
                 ?? throw new MissingMemberException(uiLabelType.FullName, "text");
 
-            _getIconMethod = AccessTools.Method(GameKeyTipType, "GetIcon", new[] { GameKeyType })
-                ?? throw new MissingMethodException(GameKeyTipType.FullName, "GetIcon");
+            _waitForReleaseMethod = AccessTools.Method(
+                                        LazyInputType,
+                                        "WaitForRelease",
+                                        new[] { GameKeyType })
+                                    ?? throw new MissingMethodException(
+                                        LazyInputType.FullName,
+                                        "WaitForRelease(GameKey)");
+
+            _sliderDecKey = Enum.Parse(GameKeyType, "SliderDec");
+            _sliderIncKey = Enum.Parse(GameKeyType, "SliderInc");
+            _leftKey = Enum.Parse(GameKeyType, "Left");
+            _rightKey = Enum.Parse(GameKeyType, "Right");
         }
 
         internal static object GetActiveGui()
@@ -379,17 +401,13 @@ namespace MeditationSpeed
                 _labelTextProperty.SetValue(label, text, null);
         }
 
-        internal static string GetGameKeyIcon(string keyName)
+        internal static void WaitForDirectionalRelease(int direction)
         {
-            try
-            {
-                object key = Enum.Parse(GameKeyType, keyName);
-                return (_getIconMethod.Invoke(null, new[] { key }) as string) ?? string.Empty;
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            object sliderKey = direction < 0 ? _sliderDecKey : _sliderIncKey;
+            object navigationKey = direction < 0 ? _leftKey : _rightKey;
+
+            _waitForReleaseMethod.Invoke(null, new[] { sliderKey });
+            _waitForReleaseMethod.Invoke(null, new[] { navigationKey });
         }
 
         private static Type RequireType(string name)
