@@ -78,18 +78,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view v0.1.2 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            cat > pre-release-notes.md <<'EOF'
-            Accepted pre-1.0 build of Meditation Speed for Graveyard Keeper 1.407. Superseded by v1.0.0.
-
-            - Switch meditation between 1×, 2×, and 4×.
-            - Keyboard and gamepad controls use Graveyard Keeper's native input path.
-            - One physical press changes speed by exactly one step.
-            - The meditation tip shows only directions that are currently available.
-            - Wake/Back behavior stays vanilla.
-            - Sleep speed, ordinary gameplay speed, and save data are unchanged.
-
-            Install: put `MeditationSpeed.dll` in `Graveyard Keeper/BepInEx/plugins/`.
-            EOF
+            printf '%s\n' \
+              'Accepted pre-1.0 build of Meditation Speed for Graveyard Keeper 1.407. Superseded by v1.0.0.' \
+              '' \
+              '- Switch meditation between 1×, 2×, and 4×.' \
+              '- Keyboard and gamepad controls use Graveyard Keeper native input path.' \
+              '- One physical press changes speed by exactly one step.' \
+              '- The meditation tip shows only directions that are currently available.' \
+              '- Wake/Back behavior stays vanilla.' \
+              '- Sleep speed, ordinary gameplay speed, and save data are unchanged.' \
+              '' \
+              'Install: put MeditationSpeed.dll in Graveyard Keeper/BepInEx/plugins/.' \
+              > pre-release-notes.md
             gh release edit v0.1.2 --repo "$GITHUB_REPOSITORY" \
               --title "Meditation Speed 0.1.2 (pre-1.0)" \
               --notes-file pre-release-notes.md \
