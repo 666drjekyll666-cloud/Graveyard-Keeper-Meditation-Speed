@@ -2,7 +2,7 @@
 
 Date: 2026-09-20
 
-Status: **runtime architecture accepted; one startup fail-closed hardening item found and implemented on `dev/1.0.0`.**
+Status: **runtime architecture accepted; startup fail-closed hardening implemented and cleanly built as the 1.0.0 release candidate. Runtime smoke acceptance remains.**
 
 Target: Graveyard Keeper 1.407.
 
@@ -166,4 +166,6 @@ Do **not**:
 - persist meditation speed into save/config state without a new product decision;
 - broaden scope into sleep/general game speed.
 
-The only remaining acceptance gate is a short installed-game smoke test of the 1.0.0 candidate to confirm plugin load, one-step input, 1×/2×/4× timing, UI, and wake restoration after the startup-only hardening.
+The 1.0.0 candidate built Release with 0 warnings / 0 errors from source SHA `37964f2e17d52d2d81df9265778ff2b5ef21fe80`; DLL SHA-256 is `54888d085cefe957fc913e013b577da3890d31345956e62baeaf783c4af2bdfa`.
+
+The only remaining acceptance gate is a short installed-game smoke test of that exact DLL to confirm plugin load, one-step input, 1×/2×/4× timing, UI, and wake restoration after the startup-only hardening.
