@@ -25,7 +25,8 @@ Verified in Graveyard Keeper 1.407:
 - vanilla sets `Time.fixedDeltaTime = 0.083333336f`;
 - `WaitingGUI.StopWaiting()` restores `Time.timeScale = 1f`;
 - `WaitingGUI.StopWaiting()` restores `Time.fixedDeltaTime = 0.016666668f`;
-- the normal wake/exit input is `GameKey.Interaction`.
+- the normal wake/exit input is `GameKey.Interaction`;
+- the Back handler also routes through `StopWaiting()`.
 
 ## Native simulation behavior
 
@@ -35,7 +36,7 @@ Verified in Graveyard Keeper 1.407:
 
 Therefore the preferred architecture is to change meditation's native time scale rather than separately rewriting world time, resource recovery, crops, NPC schedules, crafting, weather, or other simulation systems.
 
-User-facing speed mapping currently accepted for research:
+User-facing speed mapping accepted for research:
 
 | UI speed | Unity timeScale |
 | --- | ---: |
@@ -43,59 +44,75 @@ User-facing speed mapping currently accepted for research:
 | 2× | 20 |
 | 4× | 40 |
 
+## Fixed-step static evidence
+
+The meaningful direct fixed-step surface found in 1.407 is narrow:
+- `CustomUpdateManager.FixedUpdate()` -> active WGO `CustomFixedUpdate()`;
+- world-object fixed components: `MovementComponent` and `KickComponent`;
+- separate `DropsList.FixedUpdate()`.
+
+Some movement/kick/drop behavior is per fixed call rather than fully delta-normalized. Therefore `fixedDeltaTime` changes both scheduling cost and some transient physics behavior.
+
+Approximate scheduling:
+
+| State | timeScale | fixedDeltaTime | FixedUpdate / real sec |
+| --- | ---: | ---: | ---: |
+| Normal | 1 | 0.016666668 | ~60 |
+| Vanilla meditation | 10 | 0.083333336 | ~120 |
+| 2× unchanged fixed step | 20 | 0.083333336 | ~240 |
+| 4× unchanged fixed step | 40 | 0.083333336 | ~480 |
+| 2× proportional | 20 | 0.16666667 | ~120 |
+| 4× proportional | 40 | 0.33333334 | ~120 |
+
+The proportional policy is now the leading candidate, but remains runtime-unaccepted because the 4× game-time fixed step is coarser.
+
+Detailed evidence: `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`.
+
 ## Input evidence
 
-`BaseGUI` routes native game keys while a GUI is active.
+`BaseGUI` routes native game keys while a GUI is active through `gamekey_delegates`.
 
 Candidate meditation speed controls:
 - `GameKey.SliderDec` = A / Left Arrow / D-pad Left
 - `GameKey.SliderInc` = D / Right Arrow / D-pad Right
 
-`WaitingGUI` does not currently assign meditation-specific behavior to these controls.
+The base `OnPressedSliderDec/Inc` handlers are virtual and currently return false; no stock overrides were found.
 
-The exact narrowest production integration seam is still under investigation; do not lock a broad `WaitingGUI.Update()` input poll merely because it is easy.
+Current static-preferred seam: patch those two semantic handlers and gate behavior to active `WaitingGUI` state. This avoids independent per-frame input polling and reflection into the delegate dictionary.
 
-## Prior art
+The same physical controls also emit logical Left/Right. Runtime must verify that WaitingGUI's gamepad navigation does not act on the paired logical key.
 
-Current `Exhaust-less` from `p1xel8ted/Graveyard-Keeper-Mods` patches `WaitingGUI.Update()` and adds HP/energy directly. That is not the same semantic model as accelerating vanilla meditation's whole scaled-time simulation.
+## UI evidence
 
-Do not copy that implementation unless scope changes.
+WaitingGUI prints its vanilla wake tip only after entering `Waiting` and setting vanilla timeScale/fixedDeltaTime.
 
-## Open evidence gate: fixed timestep
+Current static-preferred one-shot presentation seam: exact-instance-gated postfix on the single-tip `ButtonTipsStr.Print(GameKeyTip)` call used by WaitingGUI, preserving the already rendered wake text and adding native SliderDec/SliderInc icons plus the current speed.
 
-Normal gameplay:
-- `timeScale = 1`
-- `fixedDeltaTime = 0.016666668`
+This avoids a permanent UI poll but remains runtime-unaccepted because `ButtonTipsStr` is shared infrastructure.
 
-Vanilla meditation:
-- `timeScale = 10`
-- `fixedDeltaTime = 0.083333336`
+## Compatibility evidence
 
-Approximate FixedUpdate demand in real time is therefore:
-- normal: ~60/s
-- vanilla meditation: ~120/s
+### Exhaust-less
+Current `p1xel8ted/Graveyard-Keeper-Mods` patches `WaitingGUI.Update()` and directly adds HP/energy using scaled `Time.deltaTime`. Higher meditation timeScale will therefore also accelerate its added recovery.
 
-If 2×/4× changed only `timeScale`, the theoretical demand would rise to roughly:
-- 2×: ~240/s
-- 4×: ~480/s
+### Where's Ma Storage
+Current source patches `WaitingGUI.Open` only to invalidate its own inventory cache. No timing mutation found.
 
-A candidate policy is to scale `fixedDeltaTime` with the selected meditation multiplier:
-- 1×: 0.083333336
-- 2×: ~0.16666667
-- 4×: ~0.33333334
-
-That would preserve approximately the vanilla-meditation FixedUpdate frequency (~120 real-time calls/s), but this is **not yet accepted runtime behavior**. It must be checked against relevant game systems before production release.
+### Back From The Grave
+Current source owns fast-forward timing for `SleepGUI`. No `WaitingGUI` patch was found.
 
 ## Acceptance status
 
 Accepted:
-- native owner and lifecycle;
+- native owner and normal lifecycle;
 - 1×/2×/4× timeScale mapping as the research target;
 - host-native architecture direction;
-- native input candidates.
+- native input candidates;
+- static inventory of relevant fixed-step consumers;
+- static compatibility findings above.
 
-Open:
-- fixed timestep policy;
-- exact UI/input Harmony seam;
-- lifecycle fallback needed for abnormal GUI/session exits;
-- compatibility behavior with other time/meditation mods.
+Runtime-open:
+- final fixed timestep policy;
+- exact UI/input seam acceptance;
+- paired gamepad Left/Right behavior;
+- whether abnormal WaitingGUI exits require any fallback cleanup.
