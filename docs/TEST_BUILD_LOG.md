@@ -30,6 +30,33 @@ This file records numbered production candidates and research harnesses handed t
   - UI feedback: harness indicator text was too small.
 - Production promotion: harness code itself is not production code; accepted conclusions are carried into `dev/0.1.0`.
 
+## Production candidates
+
+### 0.1.0 — 2026-09-20
+
+- Status: candidate
+- Source branch: `dev/0.1.0`
+- Source SHA: `8c903a317c041d6424c426c3033345a580b8d406`
+- Build mode: Release
+- Build result: 0 warnings, 0 errors
+- Workflow run: `35473451741`
+- Artifact ID: `10593191648`
+- Artifact ZIP digest: `sha256:8c5555b656fb2799e685efac9434d05b8d7a38317cff5d6a95bb27960f5addbf`
+- Artifact: `MeditationSpeed.dll`
+- SHA-256: `083095c80aecc4ef3a27eed4bb47e04d3a10c18daefbc2502156fbaa8a46579b`
+- Purpose: first production candidate implementing accepted 1×/2×/4× meditation speed control.
+- Requested runtime checks:
+  - replace/remove Research Harness 0.0.1; do not run both;
+  - start meditation and confirm it begins at 1×;
+  - keyboard A/Left and D/Right cycle 1× <-> 2× <-> 4×;
+  - gamepad D-pad Left/Right cycles speed without visible navigation side effects;
+  - speed text is more readable than the research harness;
+  - wake/Back remain normal;
+  - after wake, ordinary gameplay timing is normal;
+  - repeat one meditation session to confirm clean reset to 1×.
+- Result: pending user acceptance
+- Stable promotion: pending
+
 ## Production candidate template
 
 ### X.Y.Z — YYYY-MM-DD
