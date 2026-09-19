@@ -2,15 +2,23 @@
 
 All notable user-facing changes are documented here.
 
-## Unreleased — 1.0.0 candidate
+## 1.0.0 — 2026-09-20
 
-- Harden Harmony startup so the plugin patches its explicit assembly rather than relying on stack-frame assembly detection.
-- If Harmony initialization fails partway through on an unsupported/drifted runtime, roll back any patches already installed by this plugin before disabling it.
-- Meditation timing, controls, UI, save behavior, and fixed-timestep policy are unchanged from the accepted 0.1.2 runtime behavior.
+First official stable release.
+
+- Add in-meditation speed selection: 1×, 2×, and 4×.
+- Use Graveyard Keeper's native keyboard/gamepad slider controls.
+- Make one physical press change the speed by exactly one step.
+- Show only currently available speed directions at the 1× and 4× boundaries.
+- Preserve vanilla wake/Back behavior.
+- Scale `Time.fixedDeltaTime` proportionally with meditation speed to keep real-time fixed-step demand close to vanilla meditation.
+- Preserve native scaled-time behavior for world progression, recovery, crops, NPCs, crafting, and other simulation systems.
+- Keep sleep speed, ordinary gameplay timing, and save data unchanged.
+- Harden Harmony startup with explicit plugin-assembly patching and rollback of partial patches on initialization failure.
 
 ## 0.1.2 — 2026-09-20
 
-First stable release.
+Pre-1.0 accepted build; superseded by 1.0.0.
 
 - Add in-meditation speed selection: 1×, 2×, and 4×.
 - Use Graveyard Keeper's native keyboard/gamepad slider controls.
