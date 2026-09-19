@@ -2,7 +2,7 @@
 
 ## Status
 
-**Closed and accepted for stable 0.1.2 on 2026-09-20.**
+**Closed and accepted for stable 1.0.0 on 2026-09-20.**
 
 Static evidence and Research Harness 0.0.1 runtime evidence are recorded in:
 - `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`;
@@ -11,7 +11,7 @@ Static evidence and Research Harness 0.0.1 runtime evidence are recorded in:
 
 ## Accepted production contract
 
-Stable 0.1.2:
+Stable 1.0.0:
 - starts each meditation session at 1×;
 - maps 1×/2×/4× to timeScale 10/20/40;
 - scales fixedDeltaTime proportionally to 0.083333336/0.16666667/0.33333334;
@@ -26,6 +26,6 @@ Stable 0.1.2:
 
 ## Acceptance
 
-The 0.1.2 candidate was tested in the installed game and explicitly accepted by the user for stable promotion on 2026-09-20.
+The 1.0.0 release candidate was tested in the installed game and explicitly accepted by the user for stable promotion on 2026-09-20. The 1.0.0 runtime behavior matches the accepted 0.1.2 meditation behavior; the only production delta is fail-closed Harmony startup hardening from the pre-1.0 audit.
 
 No pre-release research gate remains open.
