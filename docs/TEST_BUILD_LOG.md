@@ -119,9 +119,14 @@ This file records numbered production candidates and research harnesses handed t
   - switching remains exactly one step per physical press;
   - controls are comfortable on keyboard and gamepad;
   - overall behavior was explicitly accepted as stable.
-- Stable promotion: authorized 2026-09-20; publish this exact tested DLL without rebuilding.
-- Stable distribution filename: `MeditationSpeed.dll`
-- Stable binary SHA-256: `c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`
+- Stable promotion: completed 2026-09-20.
+- Stable branch: `main`.
+- GitHub Release: `v0.1.2` (release ID `392249903`).
+- Release target commit: `fcdaa777a7118b62aa9f7a2a47948468b158ec73`.
+- Stable distribution filename: `MeditationSpeed.dll`.
+- Stable binary SHA-256: `c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`.
+- Release asset digest reported by GitHub: `sha256:c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`.
+- Publication reused the exact accepted CI artifact; no rebuild was performed.
 
 ## Production candidate template
 
