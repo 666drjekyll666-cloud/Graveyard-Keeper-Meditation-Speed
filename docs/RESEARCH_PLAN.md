@@ -1,83 +1,28 @@
 # Research Plan
 
-## Goal
+## Status
 
-Close the remaining runtime evidence gates before production implementation.
+**Closed for production implementation on 2026-09-20.**
 
-Static research is recorded in `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`.
+Static evidence and Research Harness 0.0.1 runtime evidence are recorded in:
+- `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`;
+- `docs/VERIFIED_RUNTIME_DATA.md`;
+- `docs/TEST_BUILD_LOG.md`.
 
-## Phase 1 — fixed timestep
+## Accepted implementation contract
 
-Static inspection is complete.
+Production 0.1.0 should:
+- start each meditation session at 1×;
+- map 1×/2×/4× to timeScale 10/20/40;
+- scale fixedDeltaTime proportionally to 0.083333336/0.16666667/0.33333334;
+- use native SliderDec/SliderInc semantic callbacks;
+- suppress paired gamepad Left/Right navigation only while WaitingGUI owns those D-pad inputs;
+- initialize from the exact WaitingGUI button-tip event after vanilla waiting timing is installed;
+- preserve vanilla wake/Back behavior;
+- use the existing waiting-tip surface with improved readability;
+- restore ordinary timing through vanilla StopWaiting, with narrow defensive cleanup only for abnormal hide/plugin teardown;
+- avoid save mutation, EnvironmentEngine patches, sleep changes, ordinary-gameplay timing changes, and permanent polling.
 
-Leading candidate:
-- 1×: `timeScale 10`, `fixedDeltaTime 0.083333336`
-- 2×: `timeScale 20`, `fixedDeltaTime ~0.16666667`
-- 4×: `timeScale 40`, `fixedDeltaTime ~0.33333334`
+## Next step
 
-Reason: this preserves approximately the vanilla-meditation real-time fixed callback rate (~120/s).
-
-Open risk: the 4× fixed step is four times coarser in game time than vanilla meditation. Movement/path/kick/drop code contains fixed-step-sensitive behavior.
-
-A research-only runtime harness must compare:
-1. vanilla 1× baseline;
-2. 2× proportional;
-3. 4× proportional;
-4. 4× with vanilla meditation fixed step;
-5. 4× with an intermediate bounded step (~0.16666667) only if needed to distinguish the trade-off.
-
-For each short probe record:
-- effective `timeScale`;
-- effective `fixedDeltaTime`;
-- actual FixedUpdate callbacks per real second;
-- rendered/update frames per real second;
-- world-time delta over real time;
-- any obvious movement/path/physics anomaly.
-
-Avoid a long matrix if proportional 4× is already clean and stable.
-
-## Phase 2 — input/UI seam
-
-Static-preferred input seam:
-- patch `BaseGUI.OnPressedSliderDec()` / `OnPressedSliderInc()`;
-- effect only active `WaitingGUI`;
-- return true only when a speed change/handled bound occurs.
-
-Runtime must prove:
-- A / Left and D / Right change speed;
-- D-pad Left/Right changes speed;
-- wake Interaction remains unchanged;
-- paired logical Left/Right does not produce an unwanted WaitingGUI navigation action;
-- no input leaks to unrelated GUIs.
-
-Static-preferred presentation seam:
-- use the exact WaitingGUI `ButtonTipsStr.Print(GameKeyTip)` event that occurs after vanilla installs the waiting clock;
-- preserve the localized vanilla wake text;
-- append/prepend native SliderDec/SliderInc icons and current speed;
-- redraw only on speed change.
-
-Runtime must prove layout/font/readability and no unrelated button-tip mutation.
-
-## Phase 3 — lifecycle safety
-
-Runtime must prove:
-- Interaction wake restores `timeScale=1` and `fixedDeltaTime=0.016666668`;
-- Back wake restores the same values;
-- repeated meditation sessions begin and end cleanly;
-- a speed change does not survive outside waiting;
-- one safe load/scene edge is checked if it can bypass `StopWaiting()`.
-
-Do not add a global timing watchdog. Add fallback cleanup only if a real bypass is demonstrated.
-
-## Phase 4 — implementation candidate
-
-After phases 1–3 are closed:
-- freeze the accepted research conclusion;
-- create `dev/0.1.0`;
-- implement only the proven mechanism;
-- add the minimal UI;
-- perform a clean Release build;
-- record exact source SHA and artifact hash in `docs/TEST_BUILD_LOG.md`;
-- hand the numbered candidate to the user for real-game acceptance.
-
-Hosted CI is justified for a research harness only when it is needed to produce the exact runtime artifact. Routine research/docs still do not trigger hosted builds.
+Create `dev/0.1.0` from the stable line, copy the accepted research conclusions, implement the minimal production mechanism, perform a clean Release build, record source SHA/artifact hash, and hand the candidate to the user for final in-game acceptance.
