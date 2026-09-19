@@ -2,32 +2,47 @@
 
 A small quality-of-life mod for **Graveyard Keeper 1.407** that lets the player change meditation speed while the meditation interface is open.
 
-Planned initial speeds:
+## Speeds
 
 - **1×** — vanilla meditation speed
 - **2×**
 - **4×**
 
-The design goal is to accelerate Graveyard Keeper's existing meditation simulation rather than reimplement time progression, recovery, crops, NPCs, crafting, or other world systems.
+Each meditation session starts at 1×.
+
+The mod accelerates Graveyard Keeper's existing meditation simulation. It does not reimplement world time, recovery, crops, NPC schedules, crafting, sleep, or ordinary gameplay timing.
 
 ## Controls
 
-Planned controls use Graveyard Keeper's native input abstraction:
+Uses Graveyard Keeper's native input abstraction:
 
-- decrease speed: `GameKey.SliderDec` — A / Left Arrow / gamepad D-pad Left
-- increase speed: `GameKey.SliderInc` — D / Right Arrow / gamepad D-pad Right
+- decrease speed: A / Left Arrow / gamepad D-pad Left
+- increase speed: D / Right Arrow / gamepad D-pad Right
 - wake/exit: unchanged vanilla control
 
-The current speed should be visible in the meditation UI.
+The selected speed is shown in the existing meditation tip.
+
+## Architecture
+
+Accepted 1.407 timing mapping:
+
+| Speed | timeScale | fixedDeltaTime |
+| --- | ---: | ---: |
+| 1× | 10 | 0.083333336 |
+| 2× | 20 | 0.16666667 |
+| 4× | 40 | 0.33333334 |
+
+The proportional fixed timestep keeps real-time FixedUpdate demand close to vanilla meditation instead of multiplying it at 2×/4×.
+
+No save data is modified.
 
 ## Status
 
-**Research/bootstrap. No public release yet.**
+**0.1.0 development candidate. No public release yet.**
 
-The vanilla owner and time-scale path are verified. The remaining pre-implementation research item is the correct `Time.fixedDeltaTime` policy for 2×/4× meditation and the narrowest UI/input integration seam.
+Accepted research is recorded in:
+- `docs/VERIFIED_RUNTIME_DATA.md`
+- `docs/FIXED_TIMESTEP_AND_UI_RESEARCH.md`
+- `docs/TEST_BUILD_LOG.md`
 
-## Development
-
-This repository follows the engineering contract in `666drjekyll666-cloud/DevRules`.
-
-Long-lived technical evidence is recorded in `docs/VERIFIED_RUNTIME_DATA.md`; numbered test builds will be recorded in `docs/TEST_BUILD_LOG.md`.
+This repository follows `666drjekyll666-cloud/DevRules`.
