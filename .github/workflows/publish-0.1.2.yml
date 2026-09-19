@@ -1,0 +1,73 @@
+name: Publish accepted 0.1.2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - MeditationSpeed.csproj
+      - src/MeditationSpeedPlugin.cs
+      - .github/workflows/publish-0.1.2.yml
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip if release already exists
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v0.1.2 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download exact accepted artifact
+        if: steps.existing.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir accepted
+          gh run download 35475192930 --repo "$GITHUB_REPOSITORY" --name MeditationSpeed-0.1.2 --dir accepted
+
+      - name: Verify accepted binary identity
+        if: steps.existing.outputs.exists != 'true'
+        run: |
+          DLL_PATH="$(find accepted -type f -name MeditationSpeed.dll -print -quit)"
+          test -n "$DLL_PATH"
+          echo "c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0  $DLL_PATH" | sha256sum --check -
+          cp "$DLL_PATH" MeditationSpeed.dll
+
+      - name: Write release notes
+        if: steps.existing.outputs.exists != 'true'
+        run: |
+          cat > release-notes.md <<'EOF'
+          First stable release of Meditation Speed for Graveyard Keeper 1.407.
+
+          - Switch meditation between 1×, 2×, and 4×.
+          - Keyboard and gamepad controls use Graveyard Keeper's native input path.
+          - One physical press changes speed by exactly one step.
+          - The meditation tip shows only directions that are currently available.
+          - Wake/Back behavior stays vanilla.
+          - Sleep speed, ordinary gameplay speed, and save data are unchanged.
+
+          Install: put `MeditationSpeed.dll` in `Graveyard Keeper/BepInEx/plugins/`.
+          EOF
+
+      - name: Publish exact accepted DLL
+        if: steps.existing.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v0.1.2 MeditationSpeed.dll \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Meditation Speed 0.1.2" \
+            --notes-file release-notes.md \
+            --latest
