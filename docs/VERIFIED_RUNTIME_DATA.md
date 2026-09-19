@@ -110,10 +110,13 @@ This supports compatibility with Longer Days' changed day length: meditation acc
 
 ## Acceptance status
 
-Research gates closed for production candidate implementation:
+Stable 0.1.2 accepted in the installed game on 2026-09-20:
 - fixed timestep: accepted;
 - native slider input: accepted;
-- gamepad duplicate navigation: mitigation defined;
-- waiting-start UI seam: accepted with readability adjustment;
+- release-gated one-press-one-step behavior: accepted;
+- gamepad duplicate navigation mitigation: accepted;
+- waiting-start UI seam and readable boundary-aware indicator: accepted;
 - normal restoration: accepted;
-- narrow abnormal-exit cleanup: required defensively, no global watchdog.
+- narrow abnormal-exit cleanup: retained defensively, with no global watchdog.
+
+Accepted stable DLL SHA-256: `c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`.
