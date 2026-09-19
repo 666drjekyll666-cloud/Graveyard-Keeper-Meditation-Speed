@@ -6,7 +6,7 @@ This file records numbered production candidates and research harnesses handed t
 
 ### Research Harness 0.0.1 — 2026-09-20
 
-- Status: candidate
+- Status: accepted for its research purpose
 - Source branch: `research/fixed-timestep-and-ui-seam`
 - Source SHA: `3e5fd476584eb8749a98ca58b1b3ffa575b1d9bc`
 - Build mode: Release
@@ -17,10 +17,18 @@ This file records numbered production candidates and research harnesses handed t
 - DLL: `MeditationSpeedResearchHarness.dll`
 - DLL SHA-256: `b5dcffd79c099d33b068e9345ec30f5024ec33ee4babde7af884f84eccf83b92`
 - Purpose: close the fixed-timestep, native slider-input, visible-speed-indicator, and normal WaitingGUI restoration evidence gates.
-- Save safety: no save-data mutation; research-only session timing/UI changes; safety cleanup restores normal timing on abnormal hide/plugin destruction.
-- Requested runtime checks: follow `docs/RUNTIME_HARNESS_0.0.1.md` and return BepInEx `LogOutput.log`.
-- Result: pending user runtime evidence
-- Production promotion: none; harness code is not production code
+- Save safety: no save-data mutation.
+- Runtime result:
+  - 4× proportional fixed step: ~119.94 / ~120.18 fixed callbacks per real second;
+  - 4× bounded step: ~239.92/s;
+  - 4× vanilla meditation step: ~480.06/s;
+  - normal exits restored `timeScale=1` and `fixedDeltaTime=0.016666668`;
+  - native keyboard and gamepad slider input worked;
+  - gamepad also fired paired Left/Right navigation, requiring production suppression;
+  - Longer Days 1.7.1 at Day Length 675 composed correctly with the multiplier;
+  - no visual/simulation problem reported;
+  - UI feedback: harness indicator text was too small.
+- Production promotion: harness code itself is not production code; accepted conclusions are carried into `dev/0.1.0`.
 
 ## Production candidate template
 
