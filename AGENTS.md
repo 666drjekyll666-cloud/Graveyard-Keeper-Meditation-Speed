@@ -48,12 +48,12 @@ Current accepted Graveyard Keeper 1.407 evidence establishes:
 - world-time progression in `EnvironmentEngine` also uses scaled `Time.deltaTime`;
 - therefore changing the meditation time scale can accelerate the existing native simulation without separately modifying day progression, recovery, crops, NPCs, crafting, or other world systems.
 
-Treat vanilla meditation as user-facing **1×**. Candidate mappings:
-- 1× = timeScale 10
-- 2× = timeScale 20
-- 4× = timeScale 40
+Treat vanilla meditation as user-facing **1×**. Accepted stable mappings:
+- 1× = timeScale 10, fixedDeltaTime 0.083333336
+- 2× = timeScale 20, fixedDeltaTime 0.16666667
+- 4× = timeScale 40, fixedDeltaTime 0.33333334
 
-Do not change these mappings silently.
+Do not change these mappings silently. The proportional fixed-timestep policy was accepted from real-game runtime evidence.
 
 ## Architecture contract
 
@@ -72,7 +72,7 @@ Do not:
 
 Use the narrowest proven Harmony seam. If a transpiler, reflection, or private/internal dependency is required, isolate it and validate the target structure explicitly.
 
-The `Time.fixedDeltaTime` policy is an open evidence gate. Increasing `Time.timeScale` while leaving the vanilla meditation fixed timestep unchanged can multiply real-time FixedUpdate load. Do not ship 2×/4× until the selected policy is justified and tested in the real game.
+The `Time.fixedDeltaTime` evidence gate is closed. Stable production scales it proportionally with meditation speed so real-time FixedUpdate demand stays close to vanilla meditation. Reopen this only if new runtime evidence contradicts the accepted policy.
 
 ## Input and UI
 
@@ -82,11 +82,11 @@ Verified candidate controls:
 - `GameKey.SliderDec`: keyboard A / Left Arrow; gamepad D-pad Left
 - `GameKey.SliderInc`: keyboard D / Right Arrow; gamepad D-pad Right
 
-Initial UX target:
+Accepted UX:
 
-`1× <-> 2× <-> 4×`
+`1×  >` -> `<  2×  >` -> `<  4×`
 
-The meditation UI must visibly communicate the current speed. The existing wake/exit control must remain functional and vanilla-compatible.
+One physical press must produce one speed step. Use the host's release-gating semantics rather than scaled-time debounce/polling. The existing wake/exit control must remain functional and vanilla-compatible.
 
 Do not add mouse-only controls or regress gamepad support.
 
@@ -109,6 +109,7 @@ For uncertain runtime behavior, use a narrow disposable diagnostic or user-opera
 ## Git, CI and acceptance
 
 - `main` is the accepted stable line.
+- Current accepted stable version: **0.1.2**.
 - Research and unaccepted runtime candidates stay off `main`.
 - Use `research/<topic>` for evidence gathering and `dev/<version>` when a build-bearing implementation line exists.
 - Do not consume a numbered version for research-only work.
