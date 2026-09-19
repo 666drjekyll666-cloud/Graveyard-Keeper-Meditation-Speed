@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace MeditationSpeed
 {
-    // Production candidate 0.1.2: accepted timing/input model with boundary-aware speed indicator.
+    // Production candidate 1.0.0: accepted runtime model with fail-closed Harmony initialization.
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class MeditationSpeedPlugin : BaseUnityPlugin
     {
         public const string PluginGuid = "nikich.gyk.meditationspeed";
         public const string PluginName = "Meditation Speed";
-        public const string PluginVersion = "0.1.2";
+        public const string PluginVersion = "1.0.0";
 
         private Harmony _harmony;
 
@@ -24,12 +24,28 @@ namespace MeditationSpeed
                 MeditationSession.Initialize();
 
                 _harmony = new Harmony(PluginGuid);
-                _harmony.PatchAll();
+                _harmony.PatchAll(typeof(MeditationSpeedPlugin).Assembly);
 
                 Logger.LogInfo(PluginName + " " + PluginVersion + " loaded.");
             }
             catch (Exception ex)
             {
+                // PatchAll is not transactional. If an unsupported runtime causes
+                // a later patch target to fail, remove any earlier patches from
+                // this Harmony owner before disabling the plugin.
+                try
+                {
+                    if (_harmony != null)
+                    {
+                        _harmony.UnpatchSelf();
+                        _harmony = null;
+                    }
+                }
+                catch (Exception rollbackEx)
+                {
+                    Logger.LogError("Failed to roll back partial Harmony patches: " + rollbackEx);
+                }
+
                 Logger.LogError("Failed to initialize " + PluginName + ": " + ex);
                 enabled = false;
             }
