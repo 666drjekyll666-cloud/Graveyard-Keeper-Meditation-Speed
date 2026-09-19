@@ -110,13 +110,18 @@ This supports compatibility with Longer Days' changed day length: meditation acc
 
 ## Acceptance status
 
-Stable 0.1.2 accepted in the installed game on 2026-09-20:
+Stable 1.0.0 accepted in the installed game on 2026-09-20:
 - fixed timestep: accepted;
 - native slider input: accepted;
 - release-gated one-press-one-step behavior: accepted;
 - gamepad duplicate navigation mitigation: accepted;
 - waiting-start UI seam and readable boundary-aware indicator: accepted;
 - normal restoration: accepted;
-- narrow abnormal-exit cleanup: retained defensively, with no global watchdog.
+- narrow abnormal-exit cleanup: retained defensively, with no global watchdog;
+- explicit Harmony assembly patching and fail-closed partial-patch rollback: runtime-smoke-tested.
 
-Accepted stable DLL SHA-256: `c59d8f29ad97ffb0ff38b7f420b128a0b31c2850bc168c7e597031ffc6de88f0`.
+The 1.0.0 smoke-test log confirms BepInEx loaded `Meditation Speed 1.0.0`, the game ran Graveyard Keeper 1.407, and WaitingGUI opened and closed normally during the accepted test session.
+
+Accepted source SHA: `37964f2e17d52d2d81df9265778ff2b5ef21fe80`.
+
+Accepted stable DLL SHA-256: `54888d085cefe957fc913e013b577da3890d31345956e62baeaf783c4af2bdfa`.
