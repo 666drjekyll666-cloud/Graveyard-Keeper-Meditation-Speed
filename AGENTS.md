@@ -1,6 +1,6 @@
 # Meditation Speed — Project Rules
 
-This repository follows the canonical global engineering contract in `666drjekyll666-cloud/DevRules`.
+This repository follows the canonical global engineering contract in `NikichMods/DevRules`.
 
 Before substantive technical work, read the current:
 - `ENGINEERING_RULES.md`
@@ -14,7 +14,7 @@ Global DevRules are authoritative. This file contains only project-specific fact
 ## Project identity
 
 - Project: **Meditation Speed**
-- Repository: `666drjekyll666-cloud/Graveyard-Keeper-Meditation-Speed`
+- Repository: `NikichMods/Graveyard-Keeper-Meditation-Speed`
 - Game: **Graveyard Keeper 1.407**
 - Platform: PC, BepInEx/Harmony
 - Purpose: let the player change meditation speed from the meditation interface, initially using vanilla-relative 1×, 2× and 4× speeds.
