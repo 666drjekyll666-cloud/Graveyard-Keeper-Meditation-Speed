@@ -117,7 +117,7 @@ For uncertain runtime behavior, use a narrow disposable diagnostic or user-opera
 - Before handing over a numbered DLL, require a clean Release build from the exact candidate source and record source SHA and artifact hash.
 - A handed numbered binary is immutable.
 - Accepted public releases follow the normal DevRules GitHub Release workflow.
-- Stable source is MIT-licensed; reverse-engineered/decompiled game material remains research evidence only and is not covered as project-owned source.
+- Current project-owned source is MPL-2.0-licensed; earlier MIT-distributed versions retain their historical MIT grants. Reverse-engineered/decompiled game material remains research evidence only and is not covered as project-owned source.
 
 ## Long-lived sources of truth
 
