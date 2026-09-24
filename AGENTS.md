@@ -113,7 +113,7 @@ For uncertain runtime behavior, use a narrow disposable diagnostic or user-opera
 - Research and unaccepted runtime candidates stay off `main`.
 - Use `research/<topic>` for evidence gathering and `dev/<version>` when a build-bearing implementation line exists.
 - Do not consume a numbered version for research-only work.
-- Do not spend hosted CI on routine research, documentation, bookkeeping, or intermediate commits.
+- Do not run hosted CI for routine research, documentation, or bookkeeping when it proves no executable property. Intermediate code changes may use hosted CI when compile/test feedback or an artifact materially advances the work.
 - Before handing over a numbered DLL, require a clean Release build from the exact candidate source and record source SHA and artifact hash.
 - A handed numbered binary is immutable.
 - Accepted public releases follow the normal DevRules GitHub Release workflow.
